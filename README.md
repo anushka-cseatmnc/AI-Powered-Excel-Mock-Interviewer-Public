@@ -37,7 +37,7 @@
 
 | Component | Choice | Justification |
 |-----------|--------|---------------|
-| **AI Model** | Groq (Llama-70B) | • 5x faster than GPT-4<br>• 10x more cost-effective<br>• Excellent reasoning for technical content |
+| **AI Model** | Groq (Llama-70B) | • 10x more cost-effective<br>• Excellent reasoning for technical content |
 | **Frontend** | Vanilla HTML/JS | • Zero dependencies = 100% reliability<br>• Universal compatibility<br>• Instant loading |
 | **Backend** | Netlify Functions | • Serverless = infinite scaling<br>• Integrated with deployment<br>• Free tier handles 125K calls/month |
 | **State Management** | localStorage | • Client-side persistence<br>• No database overhead<br>• Works offline |
@@ -93,11 +93,6 @@
 
 **After**: AI conducts unlimited 15-minute assessments, generates detailed reports, 24/7 availability
 
-**Quantified Results:**
-- **ROI**: 4,900% (based on analyst time savings)
-- **Hiring Velocity**: 60% faster time-to-fill
-- **Quality Improvement**: Standardized assessment criteria
-- **Scalability**: Handle 100x interview volume without additional resources
 
 ---
 
