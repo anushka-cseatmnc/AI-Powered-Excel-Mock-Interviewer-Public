@@ -3,9 +3,6 @@
 
 **Live Demo**: https://moonlit-flan-f672af.netlify.app/  
 
-
----
-
 ## 📋 **DELIVERABLES**
 
 ### 1. **Design Document & Strategy** 
@@ -34,7 +31,7 @@
 
 ---
 
-## 🏗️ **TECHNICAL ARCHITECTURE**
+### 🏗️ **TECHNICAL ARCHITECTURE**
 
 ### **Technology Stack Decisions**
 
@@ -167,11 +164,7 @@ function selectNextQuestion(currentScore, questionHistory) {
 
 ---
 
-**Total Development Time**: 8 hours  
-**Technology Risk**: Minimal (proven stack)  
-**Business Impact**: Immediate and measurable  
-**Scalability**: Production-ready from day one
-4. Access at: `https://yourusername.github.io/excel-interviewer`
+
 
 ## 📁 File Structure
 ```
@@ -194,6 +187,4 @@ excel-interviewer/
 
 ---
 
-**Total Build Time:** ~8 hours
-**Deploy Time:** 5 minutes  
 **Technologies:** Vanilla HTML/JS, OpenAI API, Netlify Functions
