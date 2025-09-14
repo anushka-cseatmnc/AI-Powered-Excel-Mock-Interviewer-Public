@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>AI Excel Mock Interviewer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            background: linear-gradient(135deg, #667eea, #764ba2); 
+            min-height: 100vh; padding: 20px; 
+        }
+        .container { 
+            max-width: 800px; margin: 0 auto; background: white; 
+            border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+        }
+        .header { 
+            background: #2c3e50; color: white; padding: 25px; text-align: center; 
+            border-radius: 15px 15px 0 0; 
+        }
+        .chat { 
+            height: 500px; overflow-y: auto; padding: 20px; background: #f8f9fa; 
+        }
+        .message { 
+            margin-bottom: 15px; padding: 12px 16px; border-radius: 10px; max-width: 85%; 
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .agent { 
+            background: #e3f2fd; border-left: 4px solid #2196f3; 
+        }
+        .user { 
+            background: #e8f5e8; border-left: 4px solid #4caf50; 
+            margin-left: auto; text-align: right;
+        }
+        .thinking { 
+            background: #fff3e0; border-left: 4px solid #ff9800; 
+            font-style: italic; color: #666; opacity: 0.8; 
+        }
+        .score-badge {
+            display: inline-block;
+            background: #4caf50;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+        .input-area { 
+            padding: 20px; border-top: 1px solid #eee; display: flex; gap: 10px; 
+        }
+        #input { 
+            flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 8px; 
+            font-size: 14px; resize: none; min-height: 60px;
+        }
+        button { 
+            padding: 12px 24px; background: #2196f3; color: white; 
+            border: none; border-radius: 8px; cursor: pointer; font-weight: 600; 
+            transition: background 0.3s;
+        }
+        button:hover:not(:disabled) { background: #1976d2; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .progress { height: 4px; background: #eee; margin: 0 20px; }
+        .progress-fill { 
+            height: 100%; background: linear-gradient(90deg, #4caf50, #2196f3); 
+            width: 0%; transition: width 0.5s ease;
+        }
+        .start-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .conversation-stats {
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 AI Excel Mock Interviewer</h1>
+            <p>Intelligent Skills Assessment with Alex</p>
+        </div>
+        <div class="progress"><div class="progress-fill" id="progress"></div></div>
+        <div class="chat" id="chat"></div>
+        <div class="input-area">
+            <textarea id="input" placeholder="Click Start to begin..." disabled rows="2"></textarea>
+            <button onclick="send()" id="btn" disabled>Send</button>
+        </div>
+    </div>
+
+    <script>
+        class ExcelInterviewer {
+            constructor() {
+                this.conversationHistory = [];
+                this.currentQuestion = null;
+                this.questionCount = 0;
+                this.isWaitingForResponse = false;
+                this.init();
+            }
+
+            async init() {
+                this.addMessage('agent', `
+                    👋 <strong>Hello there! I'm Alex, your AI Excel interviewer.</strong><br><br>
+                    I'll be personally conducting your comprehensive Excel assessment today. Unlike generic tests, I'll have a real conversation with you, adapting my questions based on your responses and skill level.<br><br>
+                    
+                    <strong>Here's what makes our interview special:</strong>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li>📊 <strong>Adaptive questioning:</strong> I'll adjust difficulty based on your answers</li>
+                        <li>🗣️ <strong>Conversational style:</strong> We'll have a natural discussion, not just Q&A</li>
+                        <li>📈 <strong>Intelligent follow-ups:</strong> I'll probe deeper when needed</li>
+                        <li>🎯 <strong>Efficient assessment:</strong> Typically 8-12 questions, 10-15 minutes</li>
+                    </ul>
+                    
+                    I'll cover areas like formulas, data analysis, lookup functions, and problem-solving. Don't worry if you don't know everything - I'm here to understand your current level and provide helpful feedback!<br><br>
+                    
+                    Ready to start our conversation?<br>
+                    <button class="start-btn" onclick="interviewer.startInterview()">Let's Begin!</button>
+                `);
+            }
+
+            async startInterview() {
+                try {
+                    this.showThinking('Initializing interview session...');
+                    
+                    const response = await this.callAPI('start');
+                    this.hideThinking();
+                    
+                    this.addMessage('agent', response.message);
+                    this.currentQuestion = response.question;
+                    this.addMessage('agent', `<strong>Question 1:</strong><br><br>${response.question}`);
+                    this.questionCount = 1;
+                    
+                    this.enableInput();
+                    this.updateProgress();
+                    
+                } catch (error) {
+                    this.handleError(error);
+                }
+            }
+
+            async processAnswer(answer) {
+                if (!answer.trim() || this.isWaitingForResponse) return;
+                
+                this.isWaitingForResponse = true;
+                this.disableInput();
+                this.addMessage('user', answer);
+                
+                try {
+                    this.showThinking('Alex is analyzing your response and deciding the next question...');
+                    
+                    const response = await this.callAPI('evaluate', {
+                        question: this.currentQuestion,
+                        answer: answer,
+                        conversationHistory: this.conversationHistory
+                    });
+                    
+                    // Add to conversation history
+                    this.conversationHistory.push({
+                        question: this.currentQuestion,
+                        answer: answer,
+                        score: response.score,
+                        topic: response.currentTopic || 'general'
+                    });
+                    
+                    await this.sleep(1500); // Simulate thinking time
+                    this.hideThinking();
+                    
+                    // Display feedback with score
+                    const scoreClass = response.score >= 7 ? '#4caf50' : response.score >= 4 ? '#ff9800' : '#f44336';
+                    this.addMessage('agent', `
+                        ${response.feedback}
+                        <span class="score-badge" style="background: ${scoreClass};">
+                            Score: ${response.score}/10
+                        </span>
+                    `);
+                    
+                    // Show conversation stats if we have multiple exchanges
+                    if (this.conversationHistory.length >= 2) {
+                        const avgScore = this.conversationHistory.reduce((sum, h) => sum + h.score, 0) / this.conversationHistory.length;
+                        this.addMessage('agent', `
+                            <div class="conversation-stats">
+                                📊 <strong>Progress:</strong> ${this.conversationHistory.length} questions answered | 
+                                Average score: ${avgScore.toFixed(1)}/10 | 
+                                Topics covered: ${[...new Set(this.conversationHistory.map(h => h.topic))].length}
+                            </div>
+                        `);
+                    }
+                    
+                    if (response.shouldContinue) {
+                        // Continue with next question
+                        this.currentQuestion = response.nextQuestion;
+                        this.questionCount++;
+                        
+                        await this.sleep(800);
+                        this.addMessage('agent', `<strong>Question ${this.questionCount}:</strong><br><br>${response.nextQuestion}`);
+                        this.enableInput();
+                    } else {
+                        // Interview complete
+                        await this.sleep(1000);
+                        this.concludeInterview();
+                    }
+                    
+                } catch (error) {
+                    this.handleError(error);
+                } finally {
+                    this.isWaitingForResponse = false;
+                    this.updateProgress();
+                }
+            }
+
+            async concludeInterview() {
+                this.showThinking('Generating comprehensive assessment report...');
+                
+                await this.sleep(2500);
+                this.hideThinking();
+                
+                const scores = this.conversationHistory.map(h => h.score);
+                const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+                const topicsExplored = [...new Set(this.conversationHistory.map(h => h.topic))];
+                
+                let skillLevel = '🎯 Beginner';
+                let recommendation = 'Intensive Excel training recommended to build foundational skills.';
+                
+                if (avgScore >= 8) {
+                    skillLevel = '🌟 Advanced';
+                    recommendation = 'Excellent Excel expertise! Ready for complex data analysis roles.';
+                } else if (avgScore >= 6) {
+                    skillLevel = '📈 Intermediate';
+                    recommendation = 'Solid Excel foundation. Consider advanced training for senior roles.';
+                } else if (avgScore >= 4) {
+                    skillLevel = '📚 Developing';
+                    recommendation = 'Good potential! Focused practice on weak areas recommended.';
+                }
+                
+                this.addMessage('agent', `
+                    🎉 <strong>Interview Complete! Thank you for your time.</strong><br><br>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                        <h3 style="color: #2c3e50; margin-bottom: 10px;">📋 Final Assessment Report</h3>
+                        
+                        <strong>📊 Overall Performance:</strong><br>
+                        • Average Score: <span style="font-size: 1.2em; color: #2196f3; font-weight: bold;">${avgScore.toFixed(1)}/10</span><br>
+                        • Skill Level: ${skillLevel}<br>
+                        • Questions Answered: ${this.conversationHistory.length}<br>
+                        • Topics Explored: ${topicsExplored.length}<br><br>
+                        
+                        <strong>📈 Question-by-Question Breakdown:</strong><br>
+                        ${this.conversationHistory.map((h, i) => `
+                            <div style="margin: 5px 0; padding: 5px; background: white; border-radius: 4px;">
+                                <strong>Q${i+1}:</strong> ${h.topic} - <span style="color: ${h.score >= 7 ? '#4caf50' : h.score >= 4 ? '#ff9800' : '#f44336'};">${h.score}/10</span>
+                            </div>
+                        `).join('')}<br>
+                        
+                        <strong>💡 Recommendation:</strong><br>
+                        ${recommendation}<br><br>
+                        
+                        <strong>🎯 Areas for Focus:</strong><br>
+                        ${this.getImprovementAreas(this.conversationHistory)}
+                    </div>
+                    
+                    Thank you for using the AI Excel Mock Interviewer! Good luck with your Excel journey! 🚀
+                `);
+                
+                document.getElementById('progress').style.width = '100%';
+                this.disableInput();
+            }
+
+            getImprovementAreas(history) {
+                const weakAreas = history.filter(h => h.score < 6).map(h => h.topic);
+                if (weakAreas.length === 0) {
+                    return "• Excellent performance across all areas! Consider exploring advanced Excel features.";
+                }
+                
+                const suggestions = {
+                    'vlookup': 'Practice VLOOKUP, INDEX-MATCH, and error handling techniques',
+                    'formulas': 'Focus on complex formulas and nested functions',
+                    'data_analysis': 'Work on data cleaning, filtering, and analysis methods',
+                    'pivot_tables': 'Learn pivot table creation and advanced pivot features',
+                    'general': 'Build foundational Excel skills and practice regularly'
+                };
+                
+                return [...new Set(weakAreas)].map(area => 
+                    `• ${suggestions[area] || 'Continue practicing Excel fundamentals'}`
+                ).join('<br>');
+            }
+
+            async callAPI(action, data = {}) {
+                const response = await fetch('/.netlify/functions/ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action,
+                        ...data
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+                
+                return await response.json();
+            }
+
+            addMessage(type, content) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+                messageDiv.innerHTML = content;
+                
+                const chatDiv = document.getElementById('chat');
+                chatDiv.appendChild(messageDiv);
+                chatDiv.scrollTop = chatDiv.scrollHeight;
+            }
+
+            showThinking(message) {
+                const thinkingDiv = document.createElement('div');
+                thinkingDiv.className = 'message thinking';
+                thinkingDiv.innerHTML = `🤔 ${message}`;
+                thinkingDiv.id = 'thinking-indicator';
+                
+                document.getElementById('chat').appendChild(thinkingDiv);
+                document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+            }
+
+            hideThinking() {
+                const thinking = document.getElementById('thinking-indicator');
+                if (thinking) thinking.remove();
+            }
+
+            enableInput() {
+                const input = document.getElementById('input');
+                const button = document.getElementById('btn');
+                
+                input.disabled = false;
+                button.disabled = false;
+                input.placeholder = 'Type your detailed answer here... (Press Enter or click Send)';
+                input.focus();
+            }
+
+            disableInput() {
+                document.getElementById('input').disabled = true;
+                document.getElementById('btn').disabled = true;
+            }
+
+            updateProgress() {
+                // Progress based on conversation exchanges (up to 8 typical questions)
+                const progress = Math.min((this.conversationHistory.length / 6) * 100, 95);
+                document.getElementById('progress').style.width = progress + '%';
+            }
+
+            handleError(error) {
+                console.error('Interview Error:', error);
+                this.hideThinking();
+                this.addMessage('agent', `
+                    ⚠️ I encountered a technical issue, but let's continue! 
+                    ${error.message.includes('API') ? 'The AI service is temporarily unavailable.' : ''}
+                    <br><br>Let me ask you a general question: Can you tell me about your overall Excel experience and which features you use most frequently?
+                `);
+                this.currentQuestion = "Tell me about your overall Excel experience and which features you use most frequently.";
+                this.enableInput();
+            }
+
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+
+        // Global interview instance
+        let interviewer;
+        
+        window.onload = () => {
+            interviewer = new ExcelInterviewer();
+            
+            // Handle Enter key in textarea
+            document.getElementById('input').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    send();
+                }
+            });
+        };
+
+        async function send() {
+            const input = document.getElementById('input');
+            const answer = input.value.trim();
+            
+            if (!answer || interviewer.isWaitingForResponse) return;
+            
+            input.value = '';
+            await interviewer.processAnswer(answer);
+        }
+    </script>
+</body>
+</html>
