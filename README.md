@@ -2,7 +2,7 @@
 
 
 **Live Demo**: https://moonlit-flan-f672af.netlify.app/  
-**Repository**: https://github.com/anushka-cseatmnc/AI-Powered-Excel-Mock-Interviewer-Public
+
 
 ---
 
