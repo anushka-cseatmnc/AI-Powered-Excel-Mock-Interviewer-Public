@@ -20,7 +20,8 @@ A conversational AI agent that conducts structured Excel skills assessments for 
 ```
 excel-interviewer/
 ├── index.html (complete application)
-├── netlify/functions/evaluate.js (OpenAI integration - optional)
+├── netlify/functions/evaluate.js (Groq AI API  integration)
+|- .env( Groq api key)
 └── README.md
 ```
 
@@ -78,29 +79,7 @@ excel-interviewer/
 - Give vague answers
 - Should score <5/10, multiple follow-ups
 
-## 🔧 Environment Variables (Optional)
 
-For advanced AI evaluation:
-```
-OPENAI_API_KEY=sk-your-openai-key
-```
-
-Without API key, uses rule-based evaluation (still fully functional).
-
-## 🎨 Customization
-
-### Add Questions
-Edit `questions` array in HTML file:
-```javascript
-{
-    id: 5,
-    category: "Your Category",
-    text: "Your question here?",
-    followups: ["Follow-up 1?", "Follow-up 2?"]
-}
-```
-
-### Modify Scoring
 Update `evaluateResponse()` function with your keywords and weights.
 
 ### Styling
