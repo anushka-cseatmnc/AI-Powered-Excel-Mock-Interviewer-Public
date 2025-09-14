@@ -42,46 +42,6 @@
 | **Backend** | Netlify Functions | • Serverless = infinite scaling<br>• Integrated with deployment<br>• Free tier handles 125K calls/month |
 | **State Management** | localStorage | • Client-side persistence<br>• No database overhead<br>• Works offline |
 
-### **Core Algorithm: Hybrid Evaluation**
-
-```javascript
-async function evaluateResponse(question, answer, category) {
-    try {
-        // Primary: AI semantic analysis
-        const prompt = `Evaluate this Excel answer: "${answer}"
-        Question: "${question}"
-        Score 1-10 based on: accuracy, completeness, best practices
-        Return JSON: {score: X, reasoning: "...", followUp: "..."}`;
-        
-        return await groqAPI.generate(prompt);
-    } catch (error) {
-        // Fallback: Rule-based scoring
-        return keywordBasedEvaluation(answer, category);
-    }
-}
-```
-
-### **Agentic Behavior Implementation**
-
-**State Machine Design:**
-```javascript
-const interviewStates = {
-    INTRO: { next: 'ASSESSMENT', handler: introduceAndExplain },
-    ASSESSMENT: { next: 'FOLLOW_UP|NEXT_QUESTION', handler: evaluateAndAdapt },
-    FOLLOW_UP: { next: 'ASSESSMENT|SUMMARY', handler: probeDeeper },
-    SUMMARY: { next: 'END', handler: generateReport }
-};
-
-// Adaptive questioning based on performance
-function selectNextQuestion(currentScore, questionHistory) {
-    if (currentScore < 4) return beginnerQuestions.next();
-    if (currentScore > 8) return expertQuestions.next();
-    return standardQuestions.next();
-}
-```
-
----
-
 ## 🎯 **CORE REQUIREMENTS FULFILLMENT**
 
 ### ✅ **1. Structured Interview Flow**
@@ -118,11 +78,6 @@ function selectNextQuestion(currentScore, questionHistory) {
 - **Scalability**: Unlimited concurrent interviews
 - **Cost Efficiency**: $250 → $0.05 per interview
 
-### **AI Engineer KPIs:**
-- **Response Quality**: 85% correlation with human evaluators
-- **System Reliability**: 99.9% uptime, multi-layer fallbacks
-- **Performance**: <2 second response time for evaluations
-- **Adaptability**: Successfully handles novice to expert candidates
 
 ### **Cold Start Strategy:**
 1. **Expert Knowledge Engineering**: 20 carefully crafted questions across skill levels
@@ -170,7 +125,7 @@ function selectNextQuestion(currentScore, questionHistory) {
 ```
 excel-interviewer/
 ├── index.html (complete application)
-├── netlify/functions/evaluate.js (Groq AI API  integration)
+├── netlify/functions/ai.js (Groq AI API  integration)
 |- .env( Groq api key)
 └── README.md
 ```
@@ -187,4 +142,4 @@ excel-interviewer/
 
 ---
 
-**Technologies:** Vanilla HTML/JS, OpenAI API, Netlify Functions
+**Technologies:** Vanilla HTML/JS, Groq AI API, Netlify Functions
