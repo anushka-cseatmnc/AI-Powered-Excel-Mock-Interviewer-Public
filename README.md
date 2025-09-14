@@ -26,7 +26,8 @@ excel-interviewer/
 |- .env( Groq api key)
 └── README.md
 ```
-``` output
+Output- 
+
 <img width="1579" height="866" alt="Screenshot 2025-09-14 132420" src="https://github.com/user-attachments/assets/2ac16c29-ebf2-46a1-867c-e1c0cfc642b3" />
 
 <img width="1356" height="875" alt="Screenshot 2025-09-14 132454" src="https://github.com/user-attachments/assets/2bb328fd-aa95-445c-a060-19b61df1fa91" />
@@ -35,7 +36,6 @@ excel-interviewer/
 
 <img width="1232" height="880" alt="Screenshot 2025-09-14 132627" src="https://github.com/user-attachments/assets/5778eb36-1286-4151-848c-24e371077b17" />
 
-``` 
 
 ## ✅ Features Working Out of Box
 
