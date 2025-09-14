@@ -2,6 +2,8 @@
 
 A conversational AI agent that conducts structured Excel skills assessments for hiring.
 
+see Live - https://moonlit-flan-f672af.netlify.app/
+
 ## 🚀 Quick Deploy (5 minutes)
 
 ### Method 1: Netlify (Recommended)
